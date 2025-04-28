@@ -4,13 +4,9 @@ library(dplyr)
 library(circlize)
 library(htmlwidgets)
 
-IMR_2 <- read.delim("DNAFISH_IMR90_chr2_lite.tsv")
+IMR_2 <- read.delim("DNAFISH_IMR90_chr2_lite.csv")
 print(colnames(IMR_2))
 print(dim(IMR_2))
-tmp = c(1,2,3,198,546,556,1259,2368,2862)
-tmp = which(IMR_2$Chromosome.copy.number%in%tmp)
-IMR_2222 = IMR_2[tmp,]
-write.csv(IMR_2222, paste0("DNAFISH_IMR90_chr2_lite.csv"), row.names = FALSE)
 
 cells = unique(IMR_2$Chromosome.copy.number)
 spots = unique(IMR_2$Genomic.coordinate)
@@ -28,7 +24,7 @@ IMR_2$Coordinate = Coordinate
 
 fils = seq(100,3000,100)
 ff = 1
-distances_2 = read.table(paste0("/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/Verify/distances_2-",fils[ff],".txt"),skip = 1,header = FALSE)
+distances_2 = read.table(paste0("distances_2-",fils[ff],".txt"),skip = 1,header = FALSE)
 dim(distances_2)
 distances_2 = round(distances_2[,1],0)[-1]
 print(length(distances_2))
@@ -57,20 +53,6 @@ tt2 = which((lner>50000000)&(lner<100000000))
 
 # genomic distances (l) between pair of bins####
 ## Fig. S1B ####
-IMR_21 <- read.delim("/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/Verify/chromosome21.tsv")
-print(head(IMR_21))
-print(colnames(IMR_21))
-print(dim(IMR_21))
-
-Co = IMR_21$Genomic.coordinate
-Coordinate = rep(0,nrow = length(Co))
-for (ii in 1:length(spots)) {
-  Co_tmp = which(Co==spots[ii])
-  tmp = strsplit(spots[ii],split =':')[[1]]
-  tmp = strsplit(tmp[2],split ='-')[[1]]
-  Coordinate[Co_tmp] =(as.numeric(tmp[1]))
-}
-IMR_21$Coordinate = Coordinate
 
 # chr21 32.45 MB - 33.35 MB, Fig. S1B
 tmp = which(Coordinate>32450000&Coordinate<33350000)
@@ -135,23 +117,6 @@ legend("topright",
        col = c("brown3"),
        lty = c(2), lwd = 2)
 
-IMR_2 <- read.delim("/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/Verify/chromosome2.tsv")
-print(colnames(IMR_2))
-print(dim(IMR_2))
-
-cells = unique(IMR_21$Chromosome.copy.number)
-spots = unique(IMR_21$Genomic.coordinate)
-print(paste(length(cells),length(spots)))
-
-Co = IMR_2$Genomic.coordinate
-Coordinate = rep(0,nrow = length(Co))
-for (ii in 1:length(spots)) {
-  Co_tmp = which(Co==spots[ii])
-  tmp = strsplit(spots[ii],split =':')[[1]]
-  tmp = strsplit(tmp[2],split ='-')[[1]]
-  Coordinate[Co_tmp] =(as.numeric(tmp[1]))
-}
-IMR_2$Coordinate = Coordinate
 
 ## the 3D distances between pairs of neibhor 250k ####
 neighbor250k = matrix(0,nrow = 1000, ncol = 3000)
@@ -208,11 +173,11 @@ legend("topright",
        lty = c(2), lwd = 2)
 
 ## compared with distances 50-100 and >100 MB #####
-distances_2m100 = read.table(paste0('/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/distances_chr2L100-3000.txt'),skip = 1)
+distances_2m100 = read.table(paste0('distances_chr2L100-3000.txt'),skip = 1)
 distances_2m1000 = data.frame(distances_2m100)
 colnames(distances_2m1000) = c('distance','homolog')
 
-distances_2m50 = read.table(paste0('/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/distances_chr2L50-3000.txt'),skip = 1)
+distances_2m50 = read.table(paste0('distances_chr2L50-3000.txt'),skip = 1)
 distances_2m500 = data.frame(distances_2m50)
 colnames(distances_2m500) = c('distance','homolog')
 
@@ -299,7 +264,7 @@ convex_hull_volume <- function(points) {
   return(hull$vol)
 }
 
-distances_2m100 = read.table(paste0('/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/distances_chr2L100-3000.txt'),skip = 1)
+distances_2m100 = read.table(paste0('distances_chr2L100-3000.txt'),skip = 1)
 distances_2m = data.frame(distances_2m100)
 colnames(distances_2m) = c('distance','homolog')
 cells = unique(distances_2m[,2])
@@ -424,7 +389,7 @@ ggplot(data_df3t, aes(x = log2(value), group = pairs,color = colors)) +
 ggsave("targets.png",width = 947/72, height = 405/72, units = "in", dpi = 72,  bg = "transparent")
 
 # Figure 2E, distribution of number of cells that a LRC exist in #####
-distances_2m100 = read.table(paste0('/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/distances_chr2L100-3000.txt'),skip = 1)
+distances_2m100 = read.table(paste0('distances_chr2L100-3000.txt'),skip = 1)
 distances_2m = data.frame(distances_2m100)
 colnames(distances_2m) = c('distance','homolog')
 cells = unique(distances_2m[,2])
