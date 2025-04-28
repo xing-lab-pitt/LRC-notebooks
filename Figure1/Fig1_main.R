@@ -346,23 +346,19 @@ iqr =2
 chr2 = 242200000
 chr14 = 108000000
 chr21 = 46700000
-# input chr2 ####
-filenms = c("H1ME_rep2","H1MSC_rep1","H1MSC_rep2","H1NPC_rep1","H1NPC_rep2","SRR10307","SRR103072","SRR103073","IMR90","SRR1909069","SRR1909070","SRR7702334","SRR7702335","SRR8446383","SRR8446384","SRR8446385","SRR8446387","SRR11566147","SRR11566149","SRR11566148","SRR11566171","SRR11566172","SRR11566173","SRR11566187","SRR11566188","SRR17786755","SRR17786756","SRR17786763","SRR17786764")
-
-filenms2 = c("H1ME_rep2", "H1MSC_rep1", "H1MSC_rep2", "H1NPC_rep1", "H1NPC_rep2", "ESC_rep1","ESC_rep2", "H1ME_rep1", "IMR90", "MCF10A", "MCF7", "22Rv1_rep1","22Rv1_rep2", "RWPE1_rep1", "RWPE1_rep2", "C42B_rep1", "C42B_rep2", "Capan-3","Capan-1_rep1", "Capan-1_rep2", "PANC-1_rep1","PANC-1_rep2", "PANC-1_rep3", "HPNE_rep1", "HPNE_rep2", "TRP_rep2", "TRP_rep1", "FP_rep2", "FP_rep1")#, "HCT116-G1_rep1","HCT116-G1_rep2","HCT116-G1_rep3"
-
+# input, use IMR90 chr14 as an example ####
+filenms = c(’IMR90‘)
 chr_length = chr14
 chr = 14
 res = 100
 
-for (flss in filenms) {
+for (filename in filenms) {
   print(res)
   
   coord_pair <- create_coordinate_pairs(chr_length, res) # combination of region pairs
   print(dim(coord_pair))
   
-  fls = "chr14_new/IMR90.14.output.50k.txt"
-  filename = paste0('chr14_new/',flss,'.chr',chr,'.output.',res,'k.txt')
+  filename = paste0(filenms,'.chr',chr,'.output.',res,'k.txt')
   print(filename)
   grouped_data <- stat_analyze_hic(filename, res, chr_length)
   
@@ -474,15 +470,15 @@ for (flss in filenms) {
   tmp = which(hic_IQRs[,1]>20000000&hic_IQRs[,1]<30000000&hic_IQRs[,2]>103000000&hic_IQRs[,2]<107000000)
   View(hic_IQRs[tmp,])
   
-  ## save IQR>2, if wanted #####
-      tmp = which(hic_IQRs$IQRs>2)
-      print(length(tmp))
-      hic_IQRs2 = hic_IQRs[tmp,]
-      hic_IQRs2 = cbind(rep(paste0('chr',chr),length(tmp)),hic_IQRs2)
-      hic_IQRs2[,4] = round(hic_IQRs2[,4],3)
-      hic_IQRs2[,5] = round(hic_IQRs2[,5],3)
-      colnames(hic_IQRs2)[1] = 'chr'
-      print(dim(hic_IQRs2))
-      head(hic_IQRs2)
-      write.csv(hic_IQRs2, paste0("chr14_new/outliers4_",flss,'-',res,"k-chr",chr,".csv"), row.names = FALSE)
+ # ## save IQR>2 #####
+ #     tmp = which(hic_IQRs$IQRs>2)
+ #     print(length(tmp))
+ #     hic_IQRs2 = hic_IQRs[tmp,]
+ #     hic_IQRs2 = cbind(rep(paste0('chr',chr),length(tmp)),hic_IQRs2)
+ #     hic_IQRs2[,4] = round(hic_IQRs2[,4],3)
+ #     hic_IQRs2[,5] = round(hic_IQRs2[,5],3)
+ #     colnames(hic_IQRs2)[1] = 'chr'
+ #     print(dim(hic_IQRs2))
+ #     head(hic_IQRs2)
+ #     write.csv(hic_IQRs2, paste0("outliers_",flss,'-',res,"k-chr",chr,".csv"), row.names = FALSE)
   }
