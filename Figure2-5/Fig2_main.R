@@ -4,7 +4,7 @@ library(dplyr)
 library(circlize)
 library(htmlwidgets)
 
-IMR_2 <- read.delim("/Volumes/InMoLab/Chr14_paper/BioInfo_Analysis/Verify/chromosome2.tsv")
+IMR_2 <- read.delim("DNAFISH_IMR90_chr2_lite.tsv")
 print(colnames(IMR_2))
 print(dim(IMR_2))
 tmp = c(1,2,3,198,546,556,1259,2368,2862)
