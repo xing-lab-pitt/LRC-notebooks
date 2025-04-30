@@ -1,5 +1,5 @@
 # Long-range Colocalizaiton (LRC) Notebooks
-**Long-range genomic loci stochastically assemble 1 into combinatorial forms of chromosome skeleton** 
+**Long-range genomic loci stochastically assemble into combinatorial forms of chromosome skeleton** 
 [Link ](https://doi.org/10.1101/2025.02.10.637328)
 <img src="image.png" width="300" alt="">
 
@@ -8,7 +8,8 @@
 2. While the most of long-range localizations (LRCs) are formed transicently and present infrequently in tested chromosome copies, ~5% of them recur in 0.8% to >10% subpopulations of entire chromosomes, thus considered as stable contacts.  
 3. Multivalent binding is one of the possible mechanisms that ensure stable LRC structure.
 4. A subset of genomic sites serves as nucleation centers (NCs) for clustering stable LRCs, assembling hub-like domains that may be associated with chromosome conformation and territory segregation.
-
+5. These findings suggest a redundant, distributed component mechanism that facilitates chromosome folding into compact structures.
+<img src="image2.png" width="450" alt="">
 
 ## Hardware requirements
 All codes requires a standard computer.
