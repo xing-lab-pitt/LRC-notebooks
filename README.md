@@ -1,6 +1,7 @@
 # Long-range Colocalizaiton (LRC) Notebooks
 **Long-range genomic loci stochastically assemble 1 into combinatorial forms of chromosome skeleton** 
 [Link ](https://doi.org/10.1101/2025.02.10.637328)
+<img src="image.png" width="300" alt="">
 
 ## Highlights
 1. Spatial proximity of two well-seperated cis-loci (>100 Mb) is a prevelent and conserved strcuture of human chromosomes. 
