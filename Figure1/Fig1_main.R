@@ -463,149 +463,227 @@ generate_circle_plot <- function(chr, chr_length, res, filename, color) {
 is_outlier <- function(x,coef) {
   return(x > quantile(x, 0.75) + coef * IQR(x))
 }
+
 iqr =2
 
 chr2 = 242200000
 chr14 = 108000000
-chr21 = 46700000
-# input, use IMR90 chr14 as an example ####
-filenms = c(’IMR90‘)
+
 chr_length = chr14
 chr = 14
 res = 100
 
-for (filename in filenms) {
-  print(res)
-  
-  coord_pair <- create_coordinate_pairs(chr_length, res) # combination of region pairs
-  print(dim(coord_pair))
-  
-  filename = paste0(filenms,'.chr',chr,'.output.',res,'k.txt')
-  print(filename)
-  grouped_data <- stat_analyze_hic(filename, res, chr_length)
-  
-  ## Create plot ####
-  # scatter boxplot 
-  scatter_plot <- ggplot(grouped_data, aes(x = dis, y = interactions, color = interactions)) +
-    geom_point(shape = 20, size = 0.5, alpha = 0.7) +
-    scale_color_gradientn(colors = c("goldenrod3", "slateblue")) +
-    theme_minimal() +
-    theme(
-      panel.grid = element_blank(),
-      panel.grid.minor.x = element_blank(),
-      axis.ticks.x = element_line(colour = "black"),
-      axis.ticks.length = unit(0.2, "cm"),
-    ) +
-    labs(
-      title = paste('chr', chr, 'resolution:', res, 'kb'),
-      x = "Genomic distances (log10)",
-      y = "Interactions (log10)"
-    )
-  print(scatter_plot)
-  # Calculate medians for boxplot
-  medians <- tapply(grouped_data$interactions, grouped_data$grp, median, na.rm = TRUE)
-  # Create boxplot 
-  box_plot <- ggplot(grouped_data, aes(x = factor(grp), y = interactions, group = grp)) +
-    stat_boxplot(geom = 'errorbar', coef = iqr, width = 0.5) +
-    geom_boxplot(
-      fill = "burlywood1", 
-      outlier.colour = "black",
-      outlier.size = 0.5,
-      coef = iqr
-    ) +
-    stat_summary(
-      fun = median, 
-      geom = "line", 
-      aes(group = 1), 
-      color = "blue", 
-      size = 1
-    ) +
-    theme_minimal() +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(colour = "black"),
-      panel.border = element_blank(),
-      panel.background = element_blank(),
-      axis.text.x = element_text(angle = 45, hjust = 1)
-    ) +
-    scale_fill_brewer(palette = "Pastel1") +
-    labs(
-      title = basename(filename),
-      x = "Genomic distance (MB)",
-      y = "Interactions (log10)"
-    )
-  print(box_plot)
-  
-  ## CLOD pipeline ####
-  ##### preprocess hi-c data  #####
-  hic3 = process_hic_data(filename, res, coord_pair)
-  
-  ##### convert the data frame to log10 matrix  #####
-  st <- 0
-  ed <- max(as.numeric(coord_pair$loc1), as.numeric(coord_pair$loc2))
-  locs <- seq(st, ed, res*1000)
+coord_pair <- create_coordinate_pairs(chr_length, res) # combination of region pairs
+print(dim(coord_pair))
 
-  hic_matrix = create_log10_matrix(hic3,st,ed,res)
-  # 3D plot the log10 matrix
-  tmp1 = which(locs>20000000&locs<30000000)
-  tmp2 = which(locs>100000000&locs<107000000)
-  hic_matrix_tmp= hic_matrix[tmp1,tmp2]
-  hic_matrix_tmp[which(is.na(hic_matrix_tmp),arr.ind = T)] = min(hic_matrix,na.rm = T)
-  plot_ly() %>% add_surface(x = ~locs[tmp2], y = ~locs[tmp1], z = ~hic_matrix_tmp)%>%
-    layout(
-      scene = list(
-        xaxis = list(
-          showgrid = FALSE,
-          zeroline = FALSE,
-          showticklabels = FALSE,
-          title = ""
-        ),
-        yaxis = list(
-          showgrid = FALSE,
-          zeroline = FALSE,
-          showticklabels = FALSE,
-          title = ""
-        ),
-        zaxis = list(
-          showgrid = FALSE,
-          zeroline = FALSE,
-          showticklabels = FALSE,
-          title = ""
-        )
+cellline = 'IMR90'
+filename = paste0(cellline,'.chr',chr,'.output.',res,'k.txt')
+print(filename)
+grouped_data <- stat_analyze_hic(filename, res, chr_length)
+
+## Create plot ####
+# scatter boxplot 
+scatter_plot <- ggplot(grouped_data, aes(x = dis, y = interactions, color = interactions)) +
+  geom_point(shape = 20, size = 0.5, alpha = 0.7) +
+  scale_color_gradientn(colors = c("goldenrod3", "slateblue")) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.ticks.x = element_line(colour = "black"),
+    axis.ticks.length = unit(0.2, "cm"),
+  ) +
+  labs(
+    title = paste(cellline,'- chr', chr, 'resolution:', res, 'kb'),
+    x = "Genomic distances (log10)",
+    y = "Interactions (log10)"
+  )
+print(scatter_plot)
+# Calculate medians for boxplot
+medians <- tapply(grouped_data$interactions, grouped_data$grp, median, na.rm = TRUE)
+# Create boxplot 
+box_plot <- ggplot(grouped_data, aes(x = factor(grp), y = interactions, group = grp)) +
+  stat_boxplot(geom = 'errorbar', coef = iqr, width = 0.5) +
+  geom_boxplot(
+    fill = "burlywood1", 
+    outlier.colour = "black",
+    outlier.size = 0.5,
+    coef = iqr
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "line", 
+    aes(group = 1), 
+    color = "blue", 
+    size = 1
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  scale_fill_brewer(palette = "Pastel1") +
+  labs(
+    title = paste(cellline,'- chr', chr, 'resolution:', res, 'kb'),
+    x = "Genomic distance (MB)",
+    y = "Interactions (log10)"
+  )
+print(box_plot)
+
+## CLOD pipeline ####
+### preprocess hi-c data  #####
+hic3 = process_hic_data(filename, res, coord_pair)
+
+### convert the data frame to log10 matrix  #####
+st <- 0
+ed <- max(as.numeric(coord_pair$loc1), as.numeric(coord_pair$loc2))
+locs <- seq(st, ed, res*1000)
+
+hic_matrix = create_log10_matrix(hic3,st,ed,res)
+# 3D plot the log10 matrix
+tmp1 = which(locs>20000000&locs<30000000)
+tmp2 = which(locs>100000000&locs<107000000)
+hic_matrix_tmp= hic_matrix[tmp1,tmp2]
+hic_matrix_tmp[which(is.na(hic_matrix_tmp),arr.ind = T)] = min(hic_matrix,na.rm = T)
+plot_ly() %>% add_surface(x = ~locs[tmp2], y = ~locs[tmp1], z = ~hic_matrix_tmp)%>%
+  layout(
+    scene = list(
+      xaxis = list(
+        showgrid = FALSE,
+        zeroline = FALSE,
+        showticklabels = FALSE,
+        title = ""
+      ),
+      yaxis = list(
+        showgrid = FALSE,
+        zeroline = FALSE,
+        showticklabels = FALSE,
+        title = ""
+      ),
+      zaxis = list(
+        showgrid = FALSE,
+        zeroline = FALSE,
+        showticklabels = FALSE,
+        title = ""
       )
     )
-  
-  #### convert log10 matrix to 7×7-neighborhood mean matrix #####
-  nnb = 15
-  hic_matrix2 = calculate_neighborhood_matrix(hic_matrix, st, ed, res, nnb)
-  # plot
-  hic_matrix_tmp = hic_matrix2[tmp1,tmp2]
-  rownames(hic_matrix_tmp) = locs[tmp1]/1000000
-  colnames(hic_matrix_tmp) = locs[tmp2]/1000000
-  hic_matrix_tmp[which(is.na(hic_matrix_tmp),arr.ind = T)] = min(hic_matrix,na.rm = T)
-  plot_ly() %>% add_surface(x = ~locs[tmp2], y = ~locs[tmp1], z = ~hic_matrix_tmp)%>% colorbar(title = "log10")
-  
-  #### convert neighborhood mean matrix to IQR matrix by smoothed data #####
-  hic_IQRs  = calculate_distance_iqrs(hic_matrix2, st, ed, res)
-  # quick check
-  tmp = which(hic_IQRs[,1]>20000000&hic_IQRs[,1]<30000000&hic_IQRs[,2]>103000000&hic_IQRs[,2]<107000000)
-  View(hic_IQRs[tmp,])
-  
- # ## save IQR>2 #####
- #     tmp = which(hic_IQRs$IQRs>2)
- #     print(length(tmp))
- #     hic_IQRs2 = hic_IQRs[tmp,]
- #     hic_IQRs2 = cbind(rep(paste0('chr',chr),length(tmp)),hic_IQRs2)
- #     hic_IQRs2[,4] = round(hic_IQRs2[,4],3)
- #     hic_IQRs2[,5] = round(hic_IQRs2[,5],3)
- #     colnames(hic_IQRs2)[1] = 'chr'
- #     print(dim(hic_IQRs2))
- #     head(hic_IQRs2)
- #     write.csv(hic_IQRs2, paste0("outliers_",flss,'-',res,"k-chr",chr,".csv"), row.names = FALSE)
-  }
+  )
 
-# plot the linkage maps                     
-filename = paste0("outliers_",flss,'-',res,"k-chr",chr,".csv")
+### convert log10 matrix to 7×7-neighborhood mean matrix #####
+if (res==100) {nnb = 15}else if (res==50){nnb = 10}
+hic_matrix2 = calculate_neighborhood_matrix(hic_matrix, st, ed, res, nnb)
+# plot
+hic_matrix_tmp = hic_matrix2[tmp1,tmp2]
+rownames(hic_matrix_tmp) = locs[tmp1]/1000000
+colnames(hic_matrix_tmp) = locs[tmp2]/1000000
+hic_matrix_tmp[which(is.na(hic_matrix_tmp),arr.ind = T)] = min(hic_matrix,na.rm = T)
+plot_ly() %>% add_surface(x = ~locs[tmp2], y = ~locs[tmp1], z = ~hic_matrix_tmp)%>% colorbar(title = "log10")
+
+### convert neighborhood mean matrix to IQR matrix by smoothed data #####
+hic_IQRs  = calculate_distance_iqrs(hic_matrix2, st, ed, res)
+# quick check
+tmp = which(hic_IQRs[,1]>20000000&hic_IQRs[,1]<30000000&hic_IQRs[,2]>103000000&hic_IQRs[,2]<107000000)
+View(hic_IQRs[tmp,])
+
+# plot
+locs = seq(st,ed,res*1000)
+IQR_matrix = matrix(NA,ncol = length(locs),nrow = length(locs))
+print(dim(IQR_matrix))
+for (ii in 1:length(locs)) {
+  loc_tmp = locs[ii]
+  tmp = which(hic_IQRs$loc1==loc_tmp)
+  if (length(tmp)!=0) {
+    tmp = hic_IQRs[tmp,]
+    tmpp = match(locs,tmp$loc2)
+    IQR_matrix[ii,] = tmp$IQRs[tmpp]
+  }
+}
+# IQR_matrix[lower.tri(IQR_matrix)] = t(IQR_matrix)[lower.tri(IQR_matrix)]
+for (ii in 1:nrow(IQR_matrix)) {
+  IQR_matrix[ii,] = as.numeric(IQR_matrix[ii,])
+}
+
+tmp1 = which(locs>20000000&locs<30000000)
+tmp2 = which(locs>100000000&locs<107000000)
+IQR_matrix_tmp = IQR_matrix[tmp1,tmp2]
+
+rownames(IQR_matrix_tmp) = locs[tmp1]/1000000
+colnames(IQR_matrix_tmp) = locs[tmp2]/1000000
+my_surface <- plot_ly(x = ~locs[tmp2], y = ~locs[tmp1], z = ~IQR_matrix[tmp1,tmp2])%>%
+  add_surface() %>% 
+  colorbar(title = "IQRs")
+x_val = locs[tmp2]
+y_val = locs[tmp1]
+tsh = 2 # threshold, 2 is used in the paper.
+my_plane <- matrix(c(min(x_val),min(y_val),tsh, min(x_val),max(y_val),tsh, max(x_val),max(y_val),tsh, max(x_val),min(y_val),tsh), ncol = 3, byrow = TRUE) # add the cutoff plane to highlight the LRC
+# Add the plane to the surface plot
+my_surface <- my_surface %>% add_trace(x = my_plane[,1], y = my_plane[,2], z = my_plane[,3], type = "mesh3d", color = I("blue"),opacity = 0.5)%>%
+  layout(
+    scene = list(
+      xaxis = list(
+        showgrid = T,
+        zeroline = T,
+        showticklabels = T,
+        title = ""
+      ),
+      yaxis = list(
+        showgrid = T,
+        zeroline = T,
+        showticklabels = T,
+        title = ""
+      ),
+      zaxis = list(
+        showgrid = T,
+        zeroline = T,
+        showticklabels = T,
+        title = ""
+      )
+    )
+  )
+print(my_surface)
+
+### save IQR>2 ####
+tmp = which(hic_IQRs$IQRs>2)
+print(length(tmp))
+hic_IQRs2 = hic_IQRs[tmp,]
+hic_IQRs2 = cbind(rep(paste0('chr',chr),length(tmp)),hic_IQRs2)
+hic_IQRs2[,4] = round(hic_IQRs2[,4],3)
+hic_IQRs2[,5] = round(hic_IQRs2[,5],3)
+colnames(hic_IQRs2)[1] = 'chr'
+print(dim(hic_IQRs2))
+head(hic_IQRs2)
+write.csv(hic_IQRs2, paste0("outliers_",cellline,'-',res,"k-chr",chr,".csv"), row.names = FALSE)
+# 
+# plot Heatmaps #####
+locs = seq(st,ed,res*1000)
+IQR_matrix = matrix(NA,ncol = length(locs),nrow = length(locs))
+print(dim(IQR_matrix))
+for (ii in 1:length(locs)) {
+  loc_tmp = locs[ii]
+  tmp = which(hic_IQRs2$loc1==loc_tmp)
+  if (length(tmp)!=0) {
+    tmp = hic_IQRs2[tmp,]
+    tmpp = match(locs,tmp$loc2)
+    IQR_matrix[ii,] = tmp$IQRs[tmpp]
+  }
+}
+IQR_matrix[lower.tri(IQR_matrix)] = t(IQR_matrix)[lower.tri(IQR_matrix)]
+for (ii in 1:nrow(IQR_matrix)) {
+  IQR_matrix[ii,] = as.numeric(IQR_matrix[ii,])
+}
+colnames(IQR_matrix) = locs
+rownames(IQR_matrix) = locs
+IQR_matrix[which(is.na(IQR_matrix),arr.ind = T)]=-5
+
+heatmap(IQR_matrix, Rowv = NA, Colv = NA, scale = "none",col = colorRampPalette(c("white", "red"))(50),margins = c(5,5)) # plot heatmap of LRC
+
+heatmap_result = heatmap(hic_matrix, Rowv=NA, Colv=NA, scale="none", col=colorRampPalette(c("darkblue", "yellow"))(n=250), margins=c(5, 5))# plot the heatmap of original HiC contact
+
+# linkagemaps ####
+filename = paste0("outliers_",cellline,'-',res,"k-chr",chr,".csv")
 color = '#FDB46F'
-generate_circle_plot(chr, chr_length, res, filename, color)                 
+generate_circle_plot(chr, chr_length, res, filename, color)
