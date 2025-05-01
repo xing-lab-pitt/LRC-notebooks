@@ -1,6 +1,6 @@
 library(ggplot2)
 library(plotly)
-
+library(circlize)
 
 # create_coordinate_pairs: create_coordinate_pairs
 ## chr_length is the length of targeted chromosome, chr2 = 242200000, chr14 = 108000000, chr21 = 46700000; res: resolution, unit of res is kb.
@@ -337,7 +337,129 @@ calculate_distance_iqrs <- function(matrix, st, ed, res) {
   
   return(hic_IQRs)
 }
-
+# generate_circle_plot：generate circle plot for chromosome interactions
+generate_circle_plot <- function(chr, chr_length, res, filename, color) {
+  
+  # Calculate chromosome segments
+  segments_count <- round((chr_length + 2000000) / 2000000) + 1
+  chrom <- (1:segments_count) * 2 - 2
+  start <- rep(0, segments_count)
+  end <- rep(2000000/(res*1000), segments_count)
+  chr_sizes_df <- data.frame(chrom = chrom, start = start, end = end)
+  
+  # Create location sequence
+  locs <- seq(0, (chr_length + 2000000), 2000000)
+  
+  # Process each sample
+  plot_color <- color
+  transparent_color <- adjustcolor(color, alpha.f = 0.4)
+  
+  # Read data file
+  message("Processing file: ", filename)
+  
+  hic_IQRs <- tryCatch({
+    read.csv(filename, header = TRUE)
+  }, error = function(e) {
+    stop(paste("Error reading file:", file_path, "-", e$message))
+  })
+  
+  # Clear and initialize circos plot
+  circos.clear()
+  circos.par(
+    cell.padding = c(0, 0, 0, 0),
+    track.margin = c(0, 0.05),
+    start.degree = 90,
+    gap.degree = 0.1,
+    clock.wise = TRUE
+  )
+  
+  circos.initialize(
+    factors = chr_sizes_df$chrom,
+    xlim = cbind(chr_sizes_df$start, chr_sizes_df$end)
+  )
+  
+  # Add track with labels
+  circos.track(
+    ylim = c(0, 1), 
+    panel.fun = function(x, y) {
+      chr = CELL_META$sector.index
+      xlim = CELL_META$xlim
+      circos.text(mean(xlim), 0.5, chr, cex = 0.5)
+    },
+    bg.col = transparent_color, 
+    bg.border = TRUE, 
+    track.height = 0.1
+  )
+  
+  # Add title
+  title(paste(flss, '- chr', chr), cex.main = 1.5)
+  
+  # Filter interaction data
+  distances_stat <-hic_IQRs[,2:5]
+  colnames(distances_stat) <- c("loc1", "loc2", "balance", "IQR") # Ensure column names
+  
+  # Apply distance filter
+  long_distance <- distances_stat$loc2 - distances_stat$loc1 > 50000000
+  strong_signal <- distances_stat[, 4] > 2
+  filtered_data <- distances_stat[long_distance & strong_signal, ]
+  
+  message("Filtered data dimensions: ", nrow(filtered_data), "x", ncol(filtered_data))
+  
+  # Draw links between interacting regions
+  for (segment_i in 1:(segments_count - 1)) {
+    loc_start <- locs[segment_i]
+    loc_end <- locs[segment_i + 1]
+    loc_seq_start <- seq(loc_start, loc_end, res * 1000)
+    
+    # Find interactions starting in this segment
+    segment_interactions <- filtered_data[
+      filtered_data$loc1 >= loc_start & filtered_data$loc1 < loc_end, 
+    ]
+    
+    if (nrow(segment_interactions) > 0) {
+      # For each possible target segment
+      for (segment_j in (segment_i + 1):(segments_count - 1)) {
+        target_start <- locs[segment_j]
+        target_end <- locs[segment_j + 1]
+        loc_seq_end <- seq(target_start, target_end, res * 1000)
+        
+        # Find interactions ending in the target segment
+        target_interactions <- segment_interactions[
+          segment_interactions$loc2 >= target_start & 
+            segment_interactions$loc2 < target_end,
+        ]
+        
+        if (nrow(target_interactions) > 0) {
+          # Create matrix for vectorized operations
+          for (pos_start_idx in 1:length(loc_seq_start)) {
+            pos_start <- loc_seq_start[pos_start_idx]
+            start_interactions <- target_interactions[target_interactions$loc1 == pos_start, ]
+            
+            if (nrow(start_interactions) > 0) {
+              for (pos_end_idx in 1:length(loc_seq_end)) {
+                pos_end <- loc_seq_end[pos_end_idx]
+                interaction <- start_interactions[start_interactions$loc2 == pos_end, ]
+                
+                if (nrow(interaction) > 0 && interaction$IQR != 0) {
+                  # Calculate link thickness based on interaction strength
+                  link_thickness <- min(interaction$IQR / 20, 2) # Cap thickness
+                  
+                  # Draw the link
+                  circos.link(
+                    segment_i * 2 - 2, pos_start_idx, 
+                    segment_j * 2 - 2, pos_end_idx, 
+                    col = color, 
+                    lwd = link_thickness
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 is_outlier <- function(x,coef) {
   return(x > quantile(x, 0.75) + coef * IQR(x))
 }
@@ -482,3 +604,8 @@ for (filename in filenms) {
  #     head(hic_IQRs2)
  #     write.csv(hic_IQRs2, paste0("outliers_",flss,'-',res,"k-chr",chr,".csv"), row.names = FALSE)
   }
+
+# plot the linkage maps                     
+filename = paste0("outliers_",flss,'-',res,"k-chr",chr,".csv")
+color = '#FDB46F'
+generate_circle_plot(chr, chr_length, res, filename, color)                 
