@@ -1,7 +1,6 @@
 # =====================================================================================================
 # Fig. 4 and Fig. S8
 # =====================================================================================================
-# Verbatim extract of Revision.R, section "## LRC and epigenetics" (see the SOURCE line above every block).
 # INPUTS:   NMuMG_rep1_pos0..9.csv  (seqFISH+ spots incl. one column per epigenetic mark, z-scored)
 #           41586_2025_8838_MOESM5_ESM.csv (probe table)
 #           dist_NMuMG_rep1_pos*-chr1-allele*_100Mb.csv 
