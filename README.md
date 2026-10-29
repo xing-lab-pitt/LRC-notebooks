@@ -33,5 +33,9 @@ The codes are used to generate figures and results in
 *Long-range genomic loci stochastically assemble into combinatorial forms of chromosome skeleton*
 
 ## Reproduction instructions
-For codes to generate figures and results in Fig1 and extended Fig1-3, please download the Hi-C data as described in extended data table 1 and run the code Figure1.R.
-For codes to generate figures and results in Fig2-Fig5 and extended Fig4-6, please download the MERFISH data of chrosmosome 2 and chromosome 21 from https://zenodo.org/records/3928890
+For codes to generate figures and results in Fig1 and FigS1-5, please download the Hi-C data as described in extended data table 1 and run the code Figure1.R.
+For codes to generate figures and results in Fig2-Fig5 and extended Fig6-9, please download:
+- **MERFISH chromatin tracing** (Su et al. 2020, Cell): https://zenodo.org/records/3928890
+- **DNA seqFISH+** (Takei et al.): https://zenodo.org/records/7693825
+- **CHARM** (Chen et al. 2026, Nature): GEO sample GSM9115533, BioProject PRJNA1284811
+- **Micro-C** (Palikyras et al. 2024, Aging Cell): GEO sample GSM7661135
