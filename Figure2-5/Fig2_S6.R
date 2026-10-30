@@ -662,8 +662,8 @@ ed = ed[-1]
 # dst = dst[-1]
 lner = as.numeric(ed)-as.numeric(st)
 
-tt1 = which(lner>=100000000)
-tt2 = which((lner>50000000)&(lner<100000000))
+tt1 = which(lner>100000000)
+tt2 = which((lner>50000000)&(lner<=100000000))
 
 distances_2m100 = read.table('distances_chr2L100-3000.txt',skip = 1)
 distances_2m = data.frame(distances_2m100)
@@ -1438,8 +1438,8 @@ ed = ed[-1]
 # dst = dst[-1]
 lner = as.numeric(ed)-as.numeric(st)
 
-tt1 = which(lner>=100000000)
-tt2 = which((lner>50000000)&(lner<100000000))
+tt1 = which(lner>100000000)
+tt2 = which((lner>50000000)&(lner<=100000000))
 
 distances_2m100 = read.table(paste0('distances_chr2L100-3000.txt'),skip = 1)
 distances_2m = data.frame(distances_2m100)
